@@ -2,10 +2,18 @@ package com.example.TicketProject.service;
 
 import com.example.TicketProject.api.dto.EventCreateDTO;
 import com.example.TicketProject.api.dto.EventDetailsDTO;
+import com.example.TicketProject.api.dto.EventListAllResponseDTO;
 import com.example.TicketProject.api.dto.EventResponseDTO;
 import com.example.TicketProject.model.Event;
 import com.example.TicketProject.repository.EventRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,6 +21,9 @@ import java.util.Optional;
 
 @Service
 public class EventsService {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(EventsService.class);
 
     @Autowired
     private EventRepository eventRepository;
@@ -30,6 +41,7 @@ public class EventsService {
         event.setDescription(eventCreateDTO.description());
         event.setTotalTickets(eventCreateDTO.totalTickets());
         event.setCreatedAt(LocalDateTime.now());
+        event.setStartsAt(eventCreateDTO.startsAt());
 
         Event saved = eventRepository.save(event);
 
@@ -51,5 +63,17 @@ public class EventsService {
                         event.getStartsAt(),
                         event.getAvailableTickets()
                 ));
+    }
+
+    @Cacheable("events")
+    public Page<EventListAllResponseDTO> listEvents( @PageableDefault(
+                                                             size = 10,
+                                                             sort = "createdAt",
+                                                             direction = Sort.Direction.DESC
+                                                     ) Pageable pageable)
+    {
+        log.info("Buscando eventos no banco");
+        return eventRepository.findAll(pageable).map(EventListAllResponseDTO::from);
+
     }
 }
