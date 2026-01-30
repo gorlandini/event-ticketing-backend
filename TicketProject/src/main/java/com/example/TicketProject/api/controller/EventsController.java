@@ -21,8 +21,11 @@ import java.util.Optional;
 public class EventsController {
 
 
-    @Autowired
-    private EventsService eventService;
+    private final EventsService eventService;
+
+    public EventsController(EventsService eventService) {
+        this.eventService = eventService;
+    }
 
     @GetMapping("/testing")
     public String test() {

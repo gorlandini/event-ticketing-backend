@@ -40,6 +40,7 @@ public class EventsService {
         event.setName(eventCreateDTO.name());
         event.setDescription(eventCreateDTO.description());
         event.setTotalTickets(eventCreateDTO.totalTickets());
+        event.setAvailableTickets(eventCreateDTO.totalTickets());
         event.setCreatedAt(LocalDateTime.now());
         event.setStartsAt(eventCreateDTO.startsAt());
 
@@ -72,7 +73,7 @@ public class EventsService {
                                                              direction = Sort.Direction.DESC
                                                      ) Pageable pageable)
     {
-        log.info("Buscando eventos no banco");
+        log.info("Accessing database");
         return eventRepository.findAll(pageable).map(EventListAllResponseDTO::from);
 
     }
